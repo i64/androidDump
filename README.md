@@ -28,3 +28,8 @@ vbox86p:/data/local/tmp # ./androidDump.out com.eognikznmvsc.ucjykvjwsgf
 vbox86p:/data/local/tmp # ls
   androidDump.out 82157 40732 40728
 ```
+
+dexEsc.py extracts DEX files from junk data
+
+DEX files hold their file size from byte 64 to byte 72.
+magic bytes => file size => cut the file
