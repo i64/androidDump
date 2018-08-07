@@ -60,11 +60,11 @@ int getPidFromPackageName(char *packageName)
 unsigned long array[127][30];
 int statCounter = -1;
 
-int checkIt(long offset, int statCounter)
+int checkIt(long inode, int statCounter)
 {
     for (int i = 0; i <= statCounter; i++)
     {
-        if (array[i][0] == offset)
+        if (array[i][0] == inode)
         {
             return 1;
         }
@@ -90,23 +90,23 @@ int main(int argc, char **argv)
     while (fgets(line, 256, pMapsFile) != NULL)
     {
 
-        unsigned long offset;
+        unsigned long inode;
         char dizin[127];
         unsigned long baslangicAdresi;
         unsigned long bitisAdresi;
 
         sscanf(line, "%8lx-%8lx", &baslangicAdresi, &bitisAdresi); // this is for 32 bit. change %8lx to %12lx for 64 bit
-        sscanf(line, "%*s %*s %*s %*s %ld\n", &offset);
+        sscanf(line, "%*s %*s %*s %*s %ld\n", &inode);
         sscanf(line, "%*[^//]%[^\n]", dizin);
 
-        if (strstr(dizin, paketIsmi) != 0 && strstr(dizin, paketIsmi) != NULL && offset != 0)
+        if (strstr(dizin, paketIsmi) != 0 && strstr(dizin, paketIsmi) != NULL && inode != 0)
         {
 
-            if (checkIt(offset, statCounter + 1) == 0)
+            if (checkIt(inode, statCounter + 1) == 0)
             {
                 statCounter++;
                 i = 0;
-                array[statCounter][i] = offset;
+                array[statCounter][i] = inode;
             }
             array[statCounter][i + 1] = baslangicAdresi;
             array[statCounter][i + 2] = bitisAdresi;
@@ -120,12 +120,12 @@ int main(int argc, char **argv)
     {
 
         int r = 1;
-        char offset[10];
+        char inode[10];
 
-        sprintf(offset, "%ld", array[j][0]);
+        sprintf(inode, "%ld", array[j][0]);
 
         FILE *fp;
-        fp = fopen(offset, "a");
+        fp = fopen(inode, "a");
 
         for (int i = 1; i <= iArr[j]; i++)
         {
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
             r += 2;
         }
-        printf(" <=> %s\n", offset);
+        printf(" <=> %s\n", inode);
     }
 
     return 0;
