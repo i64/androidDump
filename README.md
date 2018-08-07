@@ -30,6 +30,15 @@ vbox86p:/data/local/tmp # ls
 ```
 
 dexEsc.py extracts DEX files from junk data
+```
+~/tmp » file 81754.dex                                                                                                                                                                       th3-j4ck4l@th3-j4ck4l
+81754.dex: ELF 32-bit LSB shared object, Intel 80386, version 1 (GNU/Linux), dynamically linked, missing section headers
 
+~/tmp » python3 dexExc.py 81754.dex                                                                                                                                                          th3-j4ck4l@th3-j4ck4l
+
+~/tmp » file 81754.dex                                                                                                                                                                       th3-j4ck4l@th3-j4ck4l
+81754.dex: Dalvik dex file version 035
+
+```
 DEX files hold their file size from byte 64 to byte 72.
 magic bytes => file size => cut the file
