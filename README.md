@@ -25,4 +25,6 @@ vbox86p:/data/local/tmp # ./androidDump.out com.eognikznmvsc.ucjykvjwsgf
   d65ca000 => d6649000 | d6649000 => d66bd000 | d66c2000 => d66c3000 | d66c3000 => d66c4000 <=> 82157
   edfd9000 => ee032000 | ee032000 => ee034000 | ee037000 => ee038000 | ee038000 => ee039000 <=> 40732
   f3725000 => f3726000 | f3830000 => f3831000 <=> 40728
+vbox86p:/data/local/tmp # ls
+  androidDump.out 82157 40732 40728
 ```
