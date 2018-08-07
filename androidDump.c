@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <sys/ptrace.h>
 
-int getPidFromPackageName(char *packageName) //pid dondur
+int getPidFromPackageName(char *packageName)
 {
 
     size_t maxProc = 1024;
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
         unsigned long baslangicAdresi;
         unsigned long bitisAdresi;
 
-        sscanf(line, "%8lx-%8lx", &baslangicAdresi, &bitisAdresi);
+        sscanf(line, "%8lx-%8lx", &baslangicAdresi, &bitisAdresi); // this is for 32 bit. change %8lx to %12lx for 64 bit
         sscanf(line, "%*s %*s %*s %*s %ld\n", &offset);
         sscanf(line, "%*[^//]%[^\n]", dizin);
 
