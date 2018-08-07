@@ -79,13 +79,10 @@ int main(int argc, char **argv)
     pid_t const pid = getPidFromPackageName(paketIsmi);
 
     char line[256];
-    char pids[9];
-
-    sprintf(pids, "%d", pid);
-    printf("%s\n", pids);
+    printf("%d\n", pid);
 
     char mapsFilename[1024];
-    sprintf(mapsFilename, "/proc/%s/maps", pids);
+    sprintf(mapsFilename, "/proc/%d/maps", pid);
     FILE *pMapsFile = fopen(mapsFilename, "r");
     int i = 0;
     int iArr[30] = {0};
