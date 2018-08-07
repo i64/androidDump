@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
             r += 2;
         }
-        printf(" => %s\n", offset);
+        printf(" <=> %s\n", offset);
     }
 
     return 0;
