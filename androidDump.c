@@ -133,7 +133,7 @@ int main(int argc, char **argv)
             size_t const size = array[j][r + 1] - array[j][r];
             char *memBuffer = NULL;
 
-            printf("%lx => %lx", array[j][r], array[j][r + 1]);
+            printf("%lx => %lx | ", array[j][r], array[j][r + 1]);
 
             asprintf(&memBuffer, "/proc/%d/mem", pid);
             char *resultBuffer = malloc(size);
