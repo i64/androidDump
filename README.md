@@ -44,9 +44,9 @@ DEX files hold their file size from byte 64 to byte 72.
 magic bytes => file size => cut the file
 
 
-Example usage:
+## Example usage:
 
-Deobfuscate BankBot botnet:
+### Deobfuscate BankBot botnet:
 
 ![BankBot](bankbot.gif)
 
