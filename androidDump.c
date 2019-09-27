@@ -13,20 +13,22 @@
 #include <unistd.h>
 #include <sys/ptrace.h>
 
-int getPidFromPackageName(char *packageName)
+#include <limits.h>
+
+int get_pid_from_package_name(char *package_name)
 {
 
-    size_t maxProc = 1024;
-    const char *procDir = "/proc";
-    char *procIsmi = calloc(1, maxProc);
-    DIR *dir = opendir(procDir);
+    size_t MAX_PROC = 1024;
+    const char *proc_directory = "/proc";
+    char *proc_name = calloc(1, MAX_PROC);
+    DIR *directory = opendir(proc_directory);
 
-    if (dir)
+    if (directory)
     {
 
         struct dirent *de = 0;
 
-        while ((de = readdir(dir)) != 0)
+        while ((de = readdir(directory)) != 0)
         {
             if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
                 continue;
@@ -37,13 +39,13 @@ int getPidFromPackageName(char *packageName)
             if (res == 1)
             {
                 char cmdline_file[1024] = {0};
-                sprintf(cmdline_file, "%s/%d/cmdline", procDir, pid);
+                sprintf(cmdline_file, "%s/%d/cmdline", proc_directory, pid);
 
                 FILE *cmdline = fopen(cmdline_file, "r");
 
-                if (getline(&procIsmi, &maxProc, cmdline) > 0)
+                if (getline(&proc_name, &MAX_PROC, cmdline) > 0)
                 {
-                    if (strstr(procIsmi, packageName) != 0)
+                    if (strstr(proc_name, package_name) != 0)
                     {
                         return pid;
                     }
@@ -52,17 +54,17 @@ int getPidFromPackageName(char *packageName)
                 fclose(cmdline);
             }
         }
-        closedir(dir);
+        closedir(directory);
         return 1;
     }
 }
 
 unsigned long array[127][30];
-int statCounter = -1;
+int stat_counter = -1;
 
-int checkIt(long inode, int statCounter)
+int verifier(long inode, int stat_counter)
 {
-    for (int i = 0; i <= statCounter; i++)
+    for (int i = 0; i <= stat_counter; i++)
     {
         if (array[i][0] == inode)
         {
@@ -75,48 +77,56 @@ int checkIt(long inode, int statCounter)
 int main(int argc, char **argv)
 {
 
-    char *paketIsmi = argv[1];
-    pid_t const pid = getPidFromPackageName(paketIsmi);
+    char *package_name = argv[1];
+    pid_t const pid = get_pid_from_package_name(package_name);
 
-    char line[256];
     printf("%d\n", pid);
 
-    char mapsFilename[1024];
-    sprintf(mapsFilename, "/proc/%d/maps", pid);
-    FILE *pMapsFile = fopen(mapsFilename, "r");
+    char sf_maps[1024];
+    
+    sprintf(sf_maps, "/proc/%d/maps", pid);
+    
+    FILE *f_maps = fopen(sf_maps, "r");
+    
     int i = 0;
-    int iArr[30] = {0};
+    int i_arr[30] = {0};
+    char line[256] = {0};
 
-    while (fgets(line, 256, pMapsFile) != NULL)
+    while (fgets(line, 256, f_maps) != NULL)
     {
 
         unsigned long inode;
-        char dizin[127];
-        unsigned long baslangicAdresi;
-        unsigned long bitisAdresi;
+        char c_director[127];
+        unsigned long addr_start;
+        unsigned long addr_end;
 
-        sscanf(line, "%8lx-%8lx", &baslangicAdresi, &bitisAdresi); // this is for 32 bit. change %8lx to %12lx for 64 bit
+        #if (__WORDSIZE == 32)
+            sscanf(line, "%8lx-%8lx", &addr_start, &addr_end);
+        #else
+            sscanf(line, "%12lx-%12lx", &addr_start, &addr_end);
+        #endif
+
         sscanf(line, "%*s %*s %*s %*s %ld\n", &inode);
-        sscanf(line, "%*[^//]%[^\n]", dizin);
+        sscanf(line, "%*[^//]%[^\n]", c_director);
 
-        if (strstr(dizin, paketIsmi) != 0 && strstr(dizin, paketIsmi) != NULL && inode != 0)
+        if (strstr(c_director, package_name) != 0 && strstr(c_director, package_name) != NULL && inode != 0)
         {
 
-            if (checkIt(inode, statCounter + 1) == 0)
+            if (verifier(inode, stat_counter + 1) == 0)
             {
-                statCounter++;
+                stat_counter++;
                 i = 0;
-                array[statCounter][i] = inode;
+                array[stat_counter][i] = inode;
             }
-            array[statCounter][i + 1] = baslangicAdresi;
-            array[statCounter][i + 2] = bitisAdresi;
+            array[stat_counter][i + 1] = addr_start;
+            array[stat_counter][i + 2] = addr_end;
             i += 2;
-            iArr[statCounter] = i / 2;
+            i_arr[stat_counter] = i / 2;
         }
     }
 
-    fclose(pMapsFile);
-    for (int j = 0; j <= statCounter; ++j)
+    fclose(f_maps);
+    for (int j = 0; j <= stat_counter; ++j)
     {
 
         int r = 1;
@@ -127,30 +137,30 @@ int main(int argc, char **argv)
         FILE *fp;
         fp = fopen(inode, "a");
 
-        for (int i = 1; i <= iArr[j]; i++)
+        for (int i = 1; i <= i_arr[j]; i++)
         {
             uintptr_t const address = array[j][r];
             size_t const size = array[j][r + 1] - array[j][r];
-            char *memBuffer = NULL;
+            char *mem_buffer = NULL;
 
             printf("%lx => %lx | ", array[j][r], array[j][r + 1]);
 
-            asprintf(&memBuffer, "/proc/%d/mem", pid);
-            char *resultBuffer = malloc(size);
+            asprintf(&mem_buffer, "/proc/%d/mem", pid);
+            char *result_buffer = malloc(size);
             ptrace(PTRACE_ATTACH, pid, NULL, NULL);
-            int memfd = open(memBuffer, O_RDONLY);
+            int memfd = open(mem_buffer, O_RDONLY);
 
             assert(memfd != -1);
 
-            pread(memfd, resultBuffer, size, address);
-            fwrite(resultBuffer, 1, size, fp);
+            pread(memfd, result_buffer, size, address);
+            fwrite(result_buffer, 1, size, fp);
 
             ptrace(PTRACE_DETACH, pid, NULL, 0);
             close(memfd);
             fclose(fp);
 
-            free(memBuffer);
-            free(resultBuffer);
+            free(mem_buffer);
+            free(result_buffer);
 
             r += 2;
         }
